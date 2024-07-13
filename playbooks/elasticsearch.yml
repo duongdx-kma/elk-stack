@@ -1,0 +1,75 @@
+- name: initial elasticsearch cluster
+  hosts: elasticsearch_servers
+  become: true
+  vars_files:
+    - vars.yaml
+  tasks:
+    - name: Install prerequisite for container run time
+      apt:
+        name:
+          - curl
+          - vim
+          - gpg
+          - apt-transport-https
+          - ca-certificates
+          - software-properties-common
+        state: present
+        update_cache: yes # this option is the same 'apt-get update'
+
+    - name: Add elasticsearch GPG apt Key
+      ansible.builtin.apt_key:
+        keyring: "/usr/share/keyrings/elasticsearch-keyring.gpg"
+        url: "https://artifacts.elastic.co/GPG-KEY-elasticsearch"
+
+    - name: Add elasticsearch Repository
+      lineinfile:
+        path: "/etc/apt/sources.list.d/elastic-8.x.list"
+        line: "deb [signed-by=/usr/share/keyrings/elasticsearch-keyring.gpg] https://artifacts.elastic.co/packages/8.x/apt stable main"
+        create: yes
+
+    - name: Update apt and install elasticsearch
+      apt:
+        name:
+          - elasticsearch
+        state: present
+        update_cache: true
+      register: elasticsearch_install
+
+    - name: copy elasticsearch_install output
+      copy:
+        content: "{{ elasticsearch_install.stdout_lines[0] }}"
+        dest: "/tmp/elasticsearch_install"
+
+    - name: Set environment variable in /etc/environment
+      lineinfile:
+        path: /etc/environment
+        regexp: '^ELASTIC_PASSWORD='
+        line: "ELASTIC_PASSWORD={{ elastic_password }}"
+        state: present
+
+    - name: Ensure the export command is present in /etc/profile.d/elastic.sh
+      lineinfile:
+        path: /etc/profile.d/elastic.sh
+        regexp: '^export ELASTIC_PASSWORD='
+        line: 'export ELASTIC_PASSWORD={{ elastic_password }}'
+        create: yes
+
+    - name: Restart elasticsearch
+      systemd:
+        name: elasticsearch
+        state: started
+        enabled: true
+        masked: no
+        daemon_reload: true
+
+    - name: Create enrollment token for Elasticsearch node
+      shell: /usr/share/elasticsearch/bin/elasticsearch-create-enrollment-token -s node
+      register: enrollment_token
+
+
+    - name: Debug enrollment token
+      debug:
+        var: enrollment_token.stdout
+
+    - name: Reconfigure Elasticsearch node with enrollment token
+      shell: /usr/share/elasticsearch/bin/elasticsearch-reconfigure-node --enrollment-token {{ enrollment_token.stdout }}

@@ -1,0 +1,26 @@
+all:
+  hosts:
+    observer:
+      ansible_host: 192.168.56.188
+    slave01:
+      ansible_host: 192.168.56.151
+    slave02:
+      ansible_host: 192.168.56.152
+      
+  children:
+    observer_servers:
+      hosts:
+        observer:
+
+    slave_servers:
+      hosts:
+        slave01:
+        slave02:
+    
+    mix_group:
+      children:
+        observer_servers:
+        slave_servers:
+      vars:
+        ansible_user: deploy
+        ansible_ssh_private_key_file: client.pem
