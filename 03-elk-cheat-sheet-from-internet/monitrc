@@ -1,0 +1,58 @@
+sudo vim /etc/monit/monitrc
+
+# ###################
+# Monit Configuration
+# ###################
+
+set daemon 120
+  with start delay 240
+
+set alert user@example.com
+set mailserver localhost
+
+set httpd port 2812 and
+   use address localhost
+   allow localhost
+
+check system search.elasticsearch.org
+  if loadavg (5min) > 10 then alert
+  if memory usage > 80% then alert
+  if cpu usage (user) > 90% then alert
+
+check filesystem data with path /var
+  if space usage > 80% for 5 times within 15 cycles then alert
+  if inode usage > 90% then alert
+  if space usage > 99% then stop
+  if inode usage > 99% then stop
+  group filesystem
+
+check host elasticsearch with address 127.0.0.1
+  if failed url http://127.0.0.1:9200/ with timeout 15 seconds then alert
+  group elasticsearch
+
+check process elasticsearch1 with pidfile /var/run/elasticsearch/elasticsearch1.pid
+  start program = "/usr/bin/sudo -H -u elasticsearch /usr/local/lib/elasticsearch-0.15.2/bin/elasticsearch -p /var/run/elasticsearch/elasticsearch1.pid" with timeout 60 seconds
+  stop program  = "/bin/kill $(/bin/cat /var/run/elasticsearch/elasticsearch1.pid)"
+  if cpu > 90% for 5 cycles then restart
+  if totalmem > 2 GB for 5 cycles then restart
+  if loadavg(5min) greater than 10 for 8 cycles then stop
+  if 3 restarts within 5 cycles then timeout
+  group elasticsearch
+
+check process varnishd with pidfile /var/run/varnish/varnishd.pid
+  start program = "/usr/sbin/varnishd -f /etc/varnish/default.vcl -a 0.0.0.0:80 -P /var/run/varnish/varnishd.pid" with timeout 60 seconds
+  stop program  = "/bin/kill $(/bin/cat /var/run/varnish/varnishd.pid)"
+  if cpu > 90% for 5 cycles then restart
+  if totalmem > 500 MB for 5 cycles then restart
+  if loadavg(5min) greater than 10 for 8 cycles then stop
+  if 3 restarts within 5 cycles then timeout
+  group elasticsearch
+
+check process post_receive_server with pidfile   /var/applications/hide/tmp/thin.pid
+  start program = "/usr/bin/sudo -H -u elasticsearch /usr/bin/env BUNDLE_GEMFILE=/var/applications/hide/Gemfile /usr/bin/bundle exec thin --chdir /var/applications/hide --rackup /var/applications/hide/config.ru --port 5000 --log /var/applications/hide/log/thin.log --pid /var/applications/hide/tmp/thin.pid --environment production --tag hide --daemonize start" with timeout 60 seconds
+  stop program  = "/bin/kill $(/bin/cat /var/applications/hide/tmp/thin.pid)"
+  if cpu > 90% for 5 cycles then restart
+  if totalmem > 2 GB for 5 cycles then restart
+  if loadavg(5min) greater than 10 for 8 cycles then stop
+  if 3 restarts within 5 cycles then timeout
+  group git

@@ -1,0 +1,154 @@
+## Install Docker
+
+```
+# install the backported kernel
+$ sudo apt-get update
+$ sudo apt-get install linux-image-generic-lts-raring linux-headers-generic-lts-raring
+
+$ sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 36A1D7869245C8950F966E92D8576A8BA88D21E9
+
+$ sudo sh -c "echo deb https://get.docker.io/ubuntu docker main > /etc/apt/sources.list.d/docker.list"
+$ sudo apt-get update
+$ sudo apt-get install lxc-docker
+
+# reboot
+$ sudo reboot
+```	
+
+
+## Install elasticsearch
+
+Link: http://dockerfile.github.io/#/elasticsearch
+
+``` bash
+$ sudo docker pull dockerfile/elasticsearch
+$ sudo mkdir -p /es/data  /es/config  /es/logs  /es/plugins
+$ sudo vim  /es/config/elasticsearch.yml
+$ sudo docker run -d -m 1024m  --name es -p 192.168.23.11:9200:9200 -p 192.168.23.11:9300:9300 -v /es:/data dockerfile/elasticsearch  /elasticsearch/bin/elasticsearch -Des.config=/data/config/elasticsearch.yml  -Xms64m -Xmx256m
+OR
+ $ sudo docker run -d -m 1224m  --name es -p 9200:9200 -p 9300:9300 -v /es:/data dockerfile/elasticsearch  /elasticsearch/bin/elasticsearch -Des.config=/data/config/elasticsearch.yml  -Xms64m -Xmx1200m
+
+```
+## Install elasticsearch plugins
+
+```
+$ sudo docker run -d  -v /es:/data  dockerfile/elasticsearch /elasticsearch/bin/plugin -install karmi/elasticsearch-paramedic  
+$ sudo docker run -d  -v /es:/data  dockerfile/elasticsearch /elasticsearch/bin/plugin -install royrusso/elasticsearch-HQ 
+$ sudo docker run -d  -v /es:/data  dockerfile/elasticsearch /elasticsearch/bin/plugin -install mobz/elasticsearch-head
+$ sudo docker run -d  -v /es:/data  dockerfile/elasticsearch /elasticsearch/bin/plugin -install lukas-vlcek/bigdesk/2.4.0
+
+```
+visit url to access plugins:
+------------
+```
+x.x.x.x:9200/_plugin/head
+x.x.x.x:9200/_plugin/hq
+x.x.x.x:9200/_plugin/paramedic
+```
+
+NOTE: Elasticsearch config file
+
+edit: 
+```
+cluster.name: log-cluster
+node.name: "elk-node-01" # if you do not want super hero names
+path.data: /data/data
+path.logs: /data/logs
+path.plugins: /data/plugins
+
+network.publish_host: IP of machine ## otherwise docker can't communicate with each other
+discovery.zen.ping.multicast.enabled: false ## disable multicast
+discovery.zen.ping.unicast.hosts: ["192.168.0.1", "192.168.0.2"]
+
+```
+## Install Kibana
+
+``` 
+$ sudo docker pull arcus/kibana
+$ sudo docker run  -p 80:80 --name kibana -e ES_HOST=192.168.0.1 -e ES_PORT=9200  arcus/kibana
+``
+
+
+
+## Install Redis and Redis-cli
+
+Link: https://github.com/dockerfile/redis
+
+Link: http://dockerfile.github.io/#/redis
+
+
+```
+$ sudo docker pull dockerfile/redis
+```
+Redis-server
+```
+$ sudo docker run -d --name redis -p 0.0.0.0:6379:6379 dockerfile/redis
+```
+Redis-Cli
+```
+$ sudo  docker run -it  dockerfile/redis bash -c 'redis-cli -h 192.168.0.1'
+```
+
+
+
+## Install logstash
+
+``` bash
+$ docker build -t logstash .
+$ docker run -d --name lshipper  logstash agent -f logstash-shipper.conf
+$ docker run -d --name lforwarder  logstash agent -f logstash-indexer.conf
+
+```
+
+logstash-shipper
+
+``` 
+$  sudo docker  run  -d   -v /home/ubuntu/logstash/:/data:ro --name lshipper custom/logstash agent -f /data/logstash-shipper.conf
+
+Logstash-indexer
+
+``` 
+$  sudo docker  run  -d  -v /home/ubuntu/logstash:/data --name lindexer custom/logstash agent -f /data/logstash-indexer.conf
+``
+
+## Install collectd
+
+```
+sudo apt-get install build-essential librrd2-dev libsensors4-dev libsnmp-dev libgcrypt-dev chkconfig
+ wget http://collectd.org/files/collectd-5.2.0.tar.gz
+ tar zxvf collectd-5.2.0.tar.gz
+ cd collectd-5.2.0
+ ./configure --prefix=/usr --sysconfdir=/etc --localstatedir=/var --libdir=/usr/lib --mandir=/usr/share/man --enable-all-plugins
+ make
+ make install
+```
+
+
+### Redis Metrics
+
+link: https://github.com/powdahound/redis-collectd-plugin
+
+
+## Elasticsearch Curator
+link: https://github.com/elasticsearch/curator
+
+``` 
+# Fast return
+## Logstash
+/usr/local/bin/curator -l /var/log/curator/curator.log delete --older-than 15
+/usr/local/bin/curator -l /var/log/curator/curator.log close --older-than 14 
+/usr/local/bin/curator -l /var/log/curator/curator.log bloom --older-than 1 
+/usr/local/bin/curator -l /var/log/curator/curator.log snapshot --delete-older-than 15 --repository Repo-One
+ 
+
+# Slow return
+## Logstash
+/usr/local/bin/curator -l /var/log/curator/curator.log optimize --older-than 1 --max_num_segments 1 
+/usr/local/bin/curator -l /var/log/curator/curator.log snapshot --older-than 2 --repository Untergeek
+
+```
+
+### Set curator as cron job
+```
+30 2 * * * ~/bin/curator.sh &> /dev/null
+```

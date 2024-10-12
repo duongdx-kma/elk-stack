@@ -40,7 +40,10 @@ xpack.security.transport.ssl:
   keystore.path: /etc/elasticsearch/certs/common-cert.p12
   truststore.path: /etc/elasticsearch/certs/common-cert.p12
 
-http.host: 0.0.0.0
+logger.level: debug
+logger.org.elasticsearch: debug
+
+# http.host: 0.0.0.0
 
 # Allow other nodes to join the cluster from anywhere
 # Connections are encrypted and mutually authenticated

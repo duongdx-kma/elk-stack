@@ -1,0 +1,50 @@
+# Cluster name
+cluster.name: es-demo-cluster
+
+# Node name for easier identification
+node.name: node03
+
+# Set the role of this node
+node.roles: ["data", "ingest"]
+
+# Network settings
+network.host: 192.168.61.153
+
+# Port for HTTP communication
+http.port: 9200
+
+transport.port: 9300
+
+# Discovery settings (list of nodes in the cluster)
+discovery.seed_hosts: ["192.168.61.151", "192.168.61.152", "192.168.61.153"]
+
+# Define the initial master-eligible nodes
+cluster.initial_master_nodes: ["node01"]
+
+# Path to the data directory
+path.data: /var/lib/elasticsearch
+
+# Path to the logs directory
+path.logs: /var/log/elasticsearch
+
+xpack.security.enabled: true
+xpack.security.enrollment.enabled: true
+
+xpack.security.http.ssl:
+  enabled: true
+  keystore.path: certs/node03/http.p12
+
+xpack.security.transport.ssl:
+  enabled: true
+  verification_mode: certificate
+  keystore.path: certs/common-cert.p12
+  truststore.path: certs/common-cert.p12
+
+logger.level: debug
+logger.org.elasticsearch: debug
+
+# http.host: 0.0.0.0
+
+# Allow other nodes to join the cluster from anywhere
+# Connections are encrypted and mutually authenticated
+# transport.host: 0.0.0.0

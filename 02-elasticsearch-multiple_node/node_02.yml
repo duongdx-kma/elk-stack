@@ -16,7 +16,7 @@ http.port: 9200
 transport.port: 9300
 
 # Discovery settings (list of nodes in the cluster)
-discovery.seed_hosts: ["192.168.61.151:9300"]
+discovery.seed_hosts: ["192.168.61.151", "192.168.61.152", "192.168.61.153"]
 
 # Define the initial master-eligible nodes
 cluster.initial_master_nodes: ["node01"]
@@ -43,8 +43,8 @@ xpack.security.transport.ssl:
 logger.level: debug
 logger.org.elasticsearch: debug
 
-http.host: 0.0.0.0
+# http.host: 0.0.0.0
 
 # Allow other nodes to join the cluster from anywhere
 # Connections are encrypted and mutually authenticated
-transport.host: 0.0.0.0
+# transport.host: 0.0.0.0

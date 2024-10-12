@@ -97,7 +97,6 @@ cd $ES_PROGRAM
 
 mkdir cert
 
-
 # create: `elastic-ca`:
 # enter ca-password: 123456
 sudo ./elasticsearch-certutil ca \
@@ -130,7 +129,7 @@ sudo ./elasticsearch-certutil cert \
 # moving certs
 cp $CERT_DIR/*.p12 $ETC_CERT_DIR
 sudo chown -R root:elasticsearch $ETC_CERT_DIR/*.p12
-sudo chmod -R 660 $ETC_CERT_DIR/*.p12
+sudo chmod -R 770 $ETC_CERT_DIR/*.p12
 
 # override password
 # xpack.security.transport.ssl.keystore.secure_password
@@ -156,7 +155,7 @@ set of files for your needs.
 
 A CSR is used when you want your certificate to be created by an existing
 Certificate Authority (CA) that you do not control (that is, you don't have
-access to the keys for that CA). 
+access to the keys for that CA).
 
 If you are in a corporate environment with a central security team, then you
 may have an existing Corporate CA that can generate your certificate for you.
@@ -407,7 +406,7 @@ Archive:  elasticsearch-ssl-http.zip
   inflating: elasticsearch/node02/http.p12  
   inflating: elasticsearch/node02/sample-elasticsearch.yml  
 replace kibana/README.txt? [y]es, [n]o, [A]ll, [N]one, [r]ename: A
-  inflating: kibana/README.txt       
+  inflating: kibana/README.txt
   inflating: kibana/elasticsearch-ca.pem  
   inflating: kibana/sample-kibana.yml  
 root@es01:/usr/share/elasticsearch# ls
@@ -453,10 +452,10 @@ systemctl restart elasticsearch;
 ### step-10: passing cert to `node02`, `node03`:
 ```bash
 # node 2
-scp -i client.pem -r $CERT_DIR deploy@192.168.61.152:/home/deploy
+scp -i client.pem -r $ETC_CERT_DIR deploy@192.168.61.152:/home/deploy
 
 # node 3
-scp -i client.pem -r $CERT_DIR deploy@192.168.61.153:/home/deploy
+scp -i client.pem -r $ETC_CERT_DIR deploy@192.168.61.153:/home/deploy
 ```
 
 ### step-10: verify cert:
@@ -466,6 +465,9 @@ openssl pkcs12 -info -in /etc/elasticsearch/certs/elastic-stack-ca.p12 -nodes -p
 openssl pkcs12 -info -in /etc/elasticsearch/certs/node01-cert.p12 -nodes -passin pass:123456
 
 openssl pkcs12 -info -in /etc/elasticsearch/certs/node02-cert.p12 -nodes -passin pass:123456
+
+
+openssl pkcs12 -info -in /etc/elasticsearch/certs/common-cert.p12 -nodes -passin pass:123456
 ```
 
 ## III. node02:
@@ -500,4 +502,220 @@ xpack.security.transport.ssl.truststore.path: certs/elastic-stack-ca.p12
 ### step-04: restart `elastic search node02`:
 ```bash
 systemctl restart elasticsearch;
+```
+
+## IV. install `kibana`:
+### step-01: add gpg-key and install from apt repository
+```bash
+wget -qO - https://artifacts.elastic.co/GPG-KEY-elasticsearch | sudo gpg --dearmor -o /usr/share/keyrings/elasticsearch-keyring.gpg
+
+sudo apt-get install apt-transport-https
+
+echo "deb [signed-by=/usr/share/keyrings/elasticsearch-keyring.gpg] https://artifacts.elastic.co/packages/8.x/apt stable main" | sudo tee /etc/apt/sources.list.d/elastic-8.x.list
+```
+
+### step-02: install `kibana`:
+```bash
+sudo apt-get update && sudo apt-get install kibana
+```
+
+### step-03: change kibana config:
+```yaml
+server.port: 5601
+
+server.host: "0.0.0.0"
+```
+
+```bash
+# restart kibana
+systemctl restart kibana
+
+# checking kibana port is expose ?
+netstat -lutpn
+
+# result
+Active Internet connections (only servers)
+Proto Recv-Q Send-Q Local Address           Foreign Address         State       PID/Program name    
+tcp        0      0 0.0.0.0:5601            0.0.0.0:*               LISTEN      2407/node
+tcp        0      0 127.0.0.53:53           0.0.0.0:*               LISTEN      638/systemd-resolve
+tcp        0      0 0.0.0.0:22              0.0.0.0:*               LISTEN      765/sshd: /usr/sbin
+tcp6       0      0 :::22                   :::*                    LISTEN      765/sshd: /usr/sbin
+udp        0      0 127.0.0.53:53           0.0.0.0:*                           638/systemd-resolve
+udp        0      0 10.0.2.15:68            0.0.0.0:*                           636/systemd-network
+```
+
+### step-04: connect `kibana` to `elasticsearch`:
+
+1. step-04.1
+![alt text](images/connect-kibana-to-elastic-search.png)
+
+
+2. step-04.2
+![alt text](images/connect-kibana-to-elastic-search-02.png)
+
+3. step-04.3: inside elastic server - change `kibana_system` password
+
+```bash
+sudo /usr/share/elasticsearch/bin/elasticsearch-reset-password -i -u kibana_system
+```
+
+4. step-04.4: fill `username` and `password`
+![alt text](images/connect-kibana-to-elastic-search-04.png)
+
+5. step-04.5: get `verify code`:
+![alt text](images/connect-kibana-to-elastic-search-05.png)
+
+go to kibana server get code:
+
+```bash
+sudo /usr/share/kibana/bin/kibana-verification-code
+```
+
+### step-05: make ssl/tls with self sign cert:
+
+1. create `kibana-openssl.cnf` file:
+```conf
+[req]
+default_bits       = 2048
+prompt             = no
+default_md         = sha256
+distinguished_name = dn
+x509_extensions    = v3_req
+
+[dn]
+C  = US
+ST = California
+L  = San Francisco
+O  = MyOrganization
+OU = MyUnit
+CN = 192.168.61.118  # Kibana server's IP or hostname
+
+[v3_req]
+subjectAltName = @alt_names
+
+[alt_names]
+IP.1 = 192.168.61.118
+DNS.1 = kibana.duongdx.local  # Optional: If using a custom DNS name
+```
+2. generate key:
+```bash
+openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
+  -keyout kibana.key \
+  -out kibana.crt \
+  -config kibana-openssl.cnf
+```
+
+3. moving cert key:
+```bash
+sudo mkdir -p /etc/kibana/certs
+sudo mv kibana.crt kibana.key /etc/kibana/certs/
+sudo chmod 660 /etc/kibana/certs/kibana.key
+sudo chown -R root:kibana /etc/kibana/certs/
+```
+
+4. import to `kibana.yml`
+```yaml
+server.host: "0.0.0.0"
+server.port: 5601
+server.ssl.enabled: true
+server.ssl.certificate: /etc/kibana/certs/kibana.crt
+server.ssl.key: /etc/kibana/certs/kibana.key
+elasticsearch.hosts: ["https://192.168.61.151:9200", "https://192.168.61.152:9200"]
+elasticsearch.username: "kibana_system"
+elasticsearch.password: "<kibana_system_password>"
+```
+
+## V. config nginx as `elasticsearch proxy`
+
+### 1. install nginx:
+```bash
+sudo apt-get install nginx
+sudo systemctl enable nginx
+sudo systemctl start nginx
+```
+
+### 2. hash password for `nginx` forward to `elasticsearch`
+```bash
+# install
+sudo apt-get install apache2-utils
+
+# create folder:
+mkdir -p /usr/local/etc/elasticsearch/
+
+# command: generate credential
+htpasswd -bB -c /usr/local/etc/elasticsearch/passwords <elastic_user> <elastic_password>
+
+# grant permission to nginx user: `www-data`
+chown www-data:www-data /usr/local/etc/elasticsearch/passwords
+```
+
+### 3. config nginx:
+```conf
+# Define the upstream Elasticsearch servers
+# /etc/nginx/sites-available/elasticsearch.conf
+upstream elasticsearch {
+    server 192.168.61.151:9200;  # Node 01 (Master)
+    server 192.168.61.152:9200;  # Node 02 (Data)
+    # server 192.168.61.153:9200;  # Node 03 (Data)
+}
+
+server {
+    listen 8080;  # Port to listen on
+    server_name elasticsearch;  # Change to your server's name or IP
+
+    client_max_body_size 50m;  # Max body size for requests
+
+    error_log /var/log/nginx/elasticsearch-errors.log;  # Error log
+    access_log /var/log/nginx/elasticsearch.log;  # Access log
+
+    location / {
+        # Deny access to Cluster API
+        if ($request_filename ~ "_cluster") {
+            return 403;
+            break;
+        }
+
+        # Deny access to Nodes Shutdown API
+        if ($request_filename ~ "_shutdown") {
+            return 403;
+            break;
+        }
+
+        # Pass requests to Elasticsearch
+        proxy_pass https://elasticsearch;
+        proxy_redirect off;
+
+        # Set headers
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header Host $http_host;
+
+        # For CORS Ajax
+        proxy_pass_header Access-Control-Allow-Origin;
+        proxy_pass_header Access-Control-Allow-Methods;
+        proxy_hide_header Access-Control-Allow-Headers;
+        add_header Access-Control-Allow-Headers 'X-Requested-With, Content-Type';
+        add_header Access-Control-Allow-Credentials true;
+
+        # Basic Authentication
+        auth_basic "Restricted Access";  # Authentication realm
+        auth_basic_user_file /usr/local/etc/elasticsearch/passwords;  # Path to password file
+
+        # Rewrite for user-specific indices (optional)
+        # rewrite ^(.*)$ /$remote_user$1 break;
+    }
+}
+```
+
+### 4. create `symbolic link` and check `nginx` config:
+```bash
+# create `symbolic link`
+sudo ln -s /etc/nginx/sites-available/elasticsearch.conf /etc/nginx/sites-enabled/
+
+# check nginx config
+sudo nginx -t
+
+# restart nginx:
+sudo systemctl restart nginx
+# testing elastic search endpoint:
 ```
