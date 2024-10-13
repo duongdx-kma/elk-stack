@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+
+# override curl command  with header: "Content-Type: application/json"
+/usr/bin/curl -H "Content-Type: application/json" "$@"

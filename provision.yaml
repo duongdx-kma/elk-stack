@@ -1,8 +1,0 @@
-- name: provision observer server
-  hosts: observer_servers
-  become: yes
-  tags:
-    - observer
-  roles:
-    - docker
-
