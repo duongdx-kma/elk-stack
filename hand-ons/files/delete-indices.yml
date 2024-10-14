@@ -1,0 +1,487 @@
+# root/.curator/delete-indicies.yml
+---
+  actions:
+    1:
+      action: delete_indices
+      description: >-
+        Delete indices older thanh 4 days
+      options:
+        ignore_empty_list: True
+        timeout_override:
+        continue_if_exception: True
+        disable_action: False
+      filters:
+      - filtertype: pattern
+        kind: regex
+        value: 'affiliate-'
+        exclude: False
+      - filtertype: age
+        source: name
+        direction: older
+        timestring: '%Y.%m.%d'
+        unit: days
+        unit_count: 4
+        exclude: False
+    2:
+      action: delete_indices
+      description: >-
+        Delete indices older thanh 4 days
+      options:
+        ignore_empty_list: True
+        timeout_override:
+        continue_if_exception: True
+        disable_action: False
+      filters:
+      - filtertype: pattern
+        kind: regex
+        value: 'appvay-'
+        exclude: False
+      - filtertype: age
+        source: name
+        direction: older
+        timestring: '%Y.%m.%d'
+        unit: days
+        unit_count: 4
+        exclude: False
+    3:
+      action: delete_indices
+      description: >-
+        Delete indices older thanh 4 days
+      options:
+        ignore_empty_list: True
+        timeout_override:
+        continue_if_exception: True
+        disable_action: False
+      filters:
+      - filtertype: pattern
+        kind: regex
+        value: 'camunda-'
+        exclude: False
+      - filtertype: age
+        source: name
+        direction: older
+        timestring: '%Y.%m.%d'
+        unit: days
+        unit_count: 15
+        exclude: False
+    4:
+      action: delete_indices
+      description: >-
+        Delete indices older thanh 4 days
+      options:
+        ignore_empty_list: True
+        timeout_override:
+        continue_if_exception: True
+        disable_action: False
+      filters:
+      - filtertype: pattern
+        kind: regex
+        value: 'cif-'
+        exclude: False
+      - filtertype: age
+        source: name
+        direction: older
+        timestring: '%Y.%m.%d'
+        unit: days
+        unit_count: 15
+        exclude: False
+    5:
+      action: delete_indices
+      description: >-
+        Delete indices older thanh 30 days
+      options:
+        ignore_empty_list: True
+        timeout_override:
+        continue_if_exception: True
+        disable_action: False
+      filters:
+      - filtertype: pattern
+        kind: regex
+        value: 'cmp-'
+        exclude: False
+      - filtertype: age
+        source: name
+        direction: older
+        timestring: '%Y-%m-%d'
+        unit: days
+        unit_count: 15
+        exclude: False
+    6:
+      action: delete_indices
+      description: >-
+        Delete indices older thanh 4 days
+      options:
+        ignore_empty_list: True
+        timeout_override:
+        continue_if_exception: True
+        disable_action: False
+      filters:
+      - filtertype: pattern
+        kind: regex
+        value: 'ecm-'
+        exclude: False
+      - filtertype: age
+        source: name
+        direction: older
+        timestring: '%Y.%m.%d'
+        unit: days
+        unit_count: 15
+        exclude: False
+    7:
+      action: delete_indices
+      description: >-
+        Delete indices older thanh 4 days
+      options:
+        ignore_empty_list: True
+        timeout_override:
+        continue_if_exception: True
+        disable_action: False
+      filters:
+      - filtertype: pattern
+        kind: regex
+        value: 'ect-'
+        exclude: False
+      - filtertype: age
+        source: name
+        direction: older
+        timestring: '%Y.%m.%d'
+        unit: days
+        unit_count: 15
+        exclude: False
+    8:
+      action: delete_indices
+      description: >-
+        Delete indices older thanh 4 days
+      options:
+        ignore_empty_list: True
+        timeout_override:
+        continue_if_exception: True
+        disable_action: False
+      filters:
+      - filtertype: pattern
+        kind: regex
+        value: 'f88'
+        exclude: False
+      - filtertype: age
+        source: name
+        direction: older
+        timestring: '%Y.%m.%d'
+        unit: days
+        unit_count: 4
+        exclude: False
+    9:
+      action: delete_indices
+      description: >-
+        Delete indices older thanh 30 days
+      options:
+        ignore_empty_list: True
+        timeout_override:
+        continue_if_exception: True
+        disable_action: False
+      filters:
+      - filtertype: pattern
+        kind: regex
+        value: 'fund-'
+        exclude: False
+      - filtertype: age
+        source: name
+        direction: older
+        timestring: '%Y-%m-%d'
+        unit: days
+        unit_count: 15
+        exclude: False
+    10:
+      action: delete_indices
+      description: >-
+        Delete indices older thanh 30 days
+      options:
+        ignore_empty_list: True
+        timeout_override:
+        continue_if_exception: True
+        disable_action: False
+      filters:
+      - filtertype: pattern
+        kind: regex
+        value: 'insurance-'
+        exclude: False
+      - filtertype: age
+        source: name
+        direction: older
+        timestring: '%Y.%m.%d'
+        unit: days
+        unit_count: 15
+        exclude: False
+    11:
+      action: delete_indices
+      description: >-
+        Delete indices older thanh 30 days
+      options:
+        ignore_empty_list: True
+        timeout_override:
+        continue_if_exception: True
+        disable_action: False
+      filters:
+      - filtertype: pattern
+        kind: regex
+        value: 'lmc-'
+        exclude: False
+      - filtertype: age
+        source: name
+        direction: older
+        timestring: '%Y.%m.%d'
+        unit: days
+        unit_count: 15
+        exclude: False
+    12:
+      action: delete_indices
+      description: >-
+        Delete indices older thanh 30 days
+      options:
+        ignore_empty_list: True
+        timeout_override:
+        continue_if_exception: True
+        disable_action: False
+      filters:
+      - filtertype: pattern
+        kind: regex
+        value: 'los-'
+        exclude: False
+      - filtertype: age
+        source: name
+        direction: older
+        timestring: '%Y.%m.%d'
+        unit: days
+        unit_count: 20
+        exclude: False
+    13:
+      action: delete_indices
+      description: >-
+        Delete indices older thanh 4 days
+      options:
+        ignore_empty_list: True
+        timeout_override:
+        continue_if_exception: True
+        disable_action: False
+      filters:
+      - filtertype: pattern
+        kind: regex
+        value: 'mas'
+        exclude: False
+      - filtertype: age
+        source: name
+        direction: older
+        timestring: '%Y.%m%d'
+        unit: days
+        unit_count: 4
+        exclude: False
+    14:
+      action: delete_indices
+      description: >-
+        Delete indices older thanh 30 days
+      options:
+        ignore_empty_list: True
+        timeout_override:
+        continue_if_exception: True
+        disable_action: False
+      filters:
+      - filtertype: pattern
+        kind: regex
+        value: 'prod-'
+        exclude: False
+      - filtertype: age
+        source: name
+        direction: older
+        timestring: '%Y.%m.%d'
+        unit: days
+        unit_count: 20
+        exclude: False
+    15:
+      action: delete_indices
+      description: >-
+        Delete indices older thanh 4 days
+      options:
+        ignore_empty_list: True
+        timeout_override:
+        continue_if_exception: True
+        disable_action: False
+      filters:
+      - filtertype: pattern
+        kind: regex
+        value: 'prod-'
+        exclude: False
+      - filtertype: age
+        source: name
+        direction: older
+        timestring: '%Y-%m-%d'
+        unit: days
+        unit_count: 20
+        exclude: False
+    16:
+      action: delete_indices
+      description: >-
+        Delete indices older thanh 4 days
+      options:
+        ignore_empty_list: True
+        timeout_override:
+        continue_if_exception: True
+        disable_action: False
+      filters:
+      - filtertype: pattern
+        kind: regex
+        value: 'sales-'
+        exclude: False
+      - filtertype: age
+        source: name
+        direction: older
+        timestring: '%Y.%m.%d'
+        unit: days
+        unit_count: 7
+        exclude: False
+    17:
+      action: delete_indices
+      description: >-
+        Delete indices older thanh 4 days
+      options:
+        ignore_empty_list: True
+        timeout_override:
+        continue_if_exception: True
+        disable_action: False
+      filters:
+      - filtertype: pattern
+        kind: regex
+        value: 'scoring-'
+        exclude: False
+      - filtertype: age
+        source: name
+        direction: older
+        timestring: '%Y.%m.%d'
+        unit: days
+        unit_count: 7
+        exclude: False
+    18:
+      action: delete_indices
+      description: >-
+        Delete indices older thanh 4 days
+      options:
+        ignore_empty_list: True
+        timeout_override:
+        continue_if_exception: True
+        disable_action: False
+      filters:
+      - filtertype: pattern
+        kind: regex
+        value: 'static-'
+        exclude: False
+      - filtertype: age
+        source: name
+        direction: older
+        timestring: '%Y-%m-%d'
+        unit: days
+        unit_count: 7
+        exclude: False
+    19:
+      action: delete_indices
+      description: >-
+        Delete indices older thanh 4 days
+      options:
+        ignore_empty_list: True
+        timeout_override:
+        continue_if_exception: True
+        disable_action: False
+      filters:
+      - filtertype: pattern
+        kind: regex
+        value: 'store-'
+        exclude: False
+      - filtertype: age
+        source: name
+        direction: older
+        timestring: '%Y.%m.%d'
+        unit: days
+        unit_count: 7
+        exclude: False
+    20:
+      action: delete_indices
+      description: >-
+        Delete indices older thanh 4 days
+      options:
+        ignore_empty_list: True
+        timeout_override:
+        continue_if_exception: True
+        disable_action: False
+      filters:
+      - filtertype: pattern
+        kind: regex
+        value: 'tracking-'
+        exclude: False
+      - filtertype: age
+        source: name
+        direction: older
+        timestring: '%Y.%m.%d'
+        unit: days
+        unit_count: 7
+        exclude: False
+    21:
+      action: delete_indices
+      description: >-
+        Delete indices older thanh 4 days
+      options:
+        ignore_empty_list: True
+        timeout_override:
+        continue_if_exception: True
+        disable_action: False
+      filters:
+      - filtertype: pattern
+        kind: regex
+        value: 'vas-'
+        exclude: False
+      - filtertype: age
+        source: name
+        direction: older
+        timestring: '%Y.%m.%d'
+        unit: days
+        unit_count: 7
+        exclude: False
+    22:
+      action: delete_indices
+      description: >-
+        Delete indices .monitoring older thanh 4 days
+      options:
+        ignore_empty_list: True
+        timeout_override:
+        continue_if_exception: True
+        disable_action: False
+      filters:
+      - filtertype: pattern
+        kind: regex
+        value: '.monitoring-'
+        exclude: False
+      - filtertype: age
+        source: name
+        direction: older
+        timestring: '%Y.%m.%d'
+        unit: days
+        unit_count: 4
+        exclude: False
+    23:
+      action: delete_indices
+      description: >-
+        Delete indices .monitoring older thanh 4 days
+      options:
+        ignore_empty_list: True
+        timeout_override:
+        continue_if_exception: True
+        disable_action: False
+      filters:
+      - filtertype: pattern
+        kind: regex
+        value: 'xln-'
+        exclude: False
+      - filtertype: age
+        source: name
+        direction: older
+        timestring: '%Y.%m.%d'
+        unit: days
+        unit_count: 7
+        exclude: False
+
